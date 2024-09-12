@@ -63,23 +63,24 @@ When running the script, you'll be prompted with several options:
 ## How It Works
 
 1. The script walks through the specified directory and its subdirectories.
-2. It looks for `foo_dr.txt` files, which contain DR information.
+2. It looks for `foo_dr.txt` files, which contain the album DR information.
 3. When found, it extracts the DR value and processes the corresponding audio files and/or folder according to the chosen options.
 4. Depending on the settings, it can:
    - Rename the album folder to include the DR value
    - Add DR information to the audio file metadata
-   - Mark the log file as processed
+   - Mark the log file as processed so the album is ignored on future runs of the script
 
 ## Notes
 
 - The script uses the `mutagen` library to handle audio file metadata.
 - It's recommended to backup your music library before running this script, especially if you choose the folder renaming option.
-- The script ignores hidden files and directories (those starting with a dot).
+- It's also recommended to test it on a small subset of your music before running it against your entire music library.  Try copung a few albums to a test folder and run it to see how it operates.
+- The script has only been tested on a Mac.
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/drRoon/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/xportz/drRoon/issues).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
