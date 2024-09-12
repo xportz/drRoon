@@ -1,6 +1,6 @@
 # drRoon
 
-drRoon is a Python script that automatically tags audio files and albums with Dynamic Range (DR) ratings extracted from foobar2000 dynamic range log files. This tool is particularly useful for music enthusiasts and audiophiles who want to organize and display DR information in their music libraries, especially when using Roon as their music management software.
+drRoon is a Python script that automatically tags audio files and albums with Dynamic Range (DR) ratings extracted from foobar2000 dynamic range log files. This tool is particularly useful for music enthusiasts and audiophiles who want to organize and display the more common "crest factor" dynamic range information in their music libraries, as opposed to the R128 method Roon natively uses.  Personally, I wanted to differentiate between different releases of the same album, to see at a glance how compressed a modern remaster might be compared to an original CD, for instance.
 
 ## Features
 
