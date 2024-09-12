@@ -5,9 +5,9 @@ drRoon is a Python script that automatically tags audio files and albums with Dy
 ## Features
 
 - Recursively processes directories to find `foo_dr.txt` files
-- Options to rename album folders with DR values
+- Option to rename album folders with DR values
 - Flexible tagging options for audio files (MP3, FLAC, M4A, DSF)
-- Ability to mark processed files to avoid redundant operations
+- Ability to mark processed folders to avoid re-processing albums
 
 ## Prerequisites
 
