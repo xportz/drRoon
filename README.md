@@ -57,7 +57,7 @@ When running the script, you'll be prompted with several options:
 
 - MP3
 - FLAC
-- M4A (AAC)
+- M4A (AAC / Apple Lossless)
 - DSF
 
 ## How It Works
