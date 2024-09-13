@@ -44,30 +44,15 @@ def get_dr_value(dr_file_path):
         logger.error(f"Error reading {dr_file_path}: {str(e)}")
         return None
 
-def process_directory(directory, dr_value, folder_name_choice, metadata_choice):
+def process_directory(directory, dr_value, metadata_choice):
     success = True
-    # Update folder name if chosen and DR value not already present
-    if folder_name_choice == "1":
-        folder_name = os.path.basename(directory)
-        if not re.search(r'\(DR \d+\)', folder_name):
-            new_name = f"{folder_name} (DR {dr_value})"
-            if new_name != folder_name:
-                new_path = os.path.join(os.path.dirname(directory), new_name)
-                safe_rename(os.path.abspath(directory), os.path.abspath(new_path))
-                directory = new_path  # Update directory path for metadata update
-        else:
-            logger.info(f"Folder '{folder_name}' already contains DR value. Skipping rename.")
-
-    # Update metadata if chosen
     if metadata_choice != "4":
         success = update_metadata_in_directory(directory, dr_value, metadata_choice)
-
-    return success, directory
+    return success
 
 def update_metadata_in_directory(directory, dr_value, metadata_choice):
     success = True
     for filename in os.listdir(directory):
-        # Skip files starting with a period without logging
         if filename.startswith('.'):
             continue
         
@@ -102,62 +87,108 @@ def update_metadata_in_directory(directory, dr_value, metadata_choice):
             success = False
     return success
 
+def update_dr_value(existing_value, dr_value, tag_type):
+    dr_text = f"DR {dr_value}"
+    separator = '; ' if tag_type == 'ROONALBUMTAG' else ', '
+    if not existing_value:
+        return dr_text
+    existing_parts = [part.strip() for part in existing_value.rstrip(separator).split(separator)]
+    existing_dr = next((part for part in existing_parts if part.startswith('DR ')), None)
+    if existing_dr == dr_text:
+        return None  # No change needed
+    new_parts = [part for part in existing_parts if not part.startswith('DR ')] + [dr_text]
+    return separator.join(new_parts)
+
 def update_id3_tags(audio, dr_value, metadata_choice):
     updated = False
-    dr_text = f"DR {dr_value}"
     if metadata_choice in ["1", "2"]:
-        if 'TXXX:VERSION' not in audio or audio['TXXX:VERSION'].text[0] != dr_text:
-            audio.add(TXXX(encoding=3, desc='VERSION', text=dr_text))
+        if 'TXXX:VERSION' in audio:
+            new_value = update_dr_value(audio['TXXX:VERSION'].text[0], dr_value, 'VERSION')
+            if new_value:
+                audio['TXXX:VERSION'].text = [new_value]
+                updated = True
+        else:
+            audio.add(TXXX(encoding=3, desc='VERSION', text=f"DR {dr_value}"))
             updated = True
     if metadata_choice in ["1", "3"]:
-        if 'TXXX:ROONALBUMTAG' not in audio or audio['TXXX:ROONALBUMTAG'].text[0] != dr_text:
-            audio.add(TXXX(encoding=3, desc='ROONALBUMTAG', text=dr_text))
+        if 'TXXX:ROONALBUMTAG' in audio:
+            new_value = update_dr_value(audio['TXXX:ROONALBUMTAG'].text[0], dr_value, 'ROONALBUMTAG')
+            if new_value:
+                audio['TXXX:ROONALBUMTAG'].text = [new_value]
+                updated = True
+        else:
+            audio.add(TXXX(encoding=3, desc='ROONALBUMTAG', text=f"DR {dr_value}"))
             updated = True
     return updated
 
 def update_flac_tags(audio, dr_value, metadata_choice):
     updated = False
-    dr_text = f"DR {dr_value}"
     if metadata_choice in ["1", "2"]:
-        if 'VERSION' not in audio or audio['VERSION'][0] != dr_text:
-            audio['VERSION'] = dr_text
+        if 'VERSION' in audio:
+            new_value = update_dr_value(audio['VERSION'][0], dr_value, 'VERSION')
+            if new_value:
+                audio['VERSION'] = [new_value]
+                updated = True
+        else:
+            audio['VERSION'] = [f"DR {dr_value}"]
             updated = True
     if metadata_choice in ["1", "3"]:
-        if 'ROONALBUMTAG' not in audio or audio['ROONALBUMTAG'][0] != dr_text:
-            audio['ROONALBUMTAG'] = dr_text
+        if 'ROONALBUMTAG' in audio:
+            new_value = update_dr_value(audio['ROONALBUMTAG'][0], dr_value, 'ROONALBUMTAG')
+            if new_value:
+                audio['ROONALBUMTAG'] = [new_value]
+                updated = True
+        else:
+            audio['ROONALBUMTAG'] = [f"DR {dr_value}"]
             updated = True
     return updated
 
 def update_mp4_tags(audio, dr_value, metadata_choice):
     updated = False
-    dr_text = f"DR {dr_value}".encode('utf-8')
     if metadata_choice in ["1", "2"]:
-        if '----:com.apple.iTunes:VERSION' not in audio or audio['----:com.apple.iTunes:VERSION'][0] != dr_text:
-            audio['----:com.apple.iTunes:VERSION'] = [dr_text]
+        tag = '----:com.apple.iTunes:VERSION'
+        if tag in audio:
+            new_value = update_dr_value(audio[tag][0].decode('utf-8'), dr_value, 'VERSION')
+            if new_value:
+                audio[tag] = [new_value.encode('utf-8')]
+                updated = True
+        else:
+            audio[tag] = [f"DR {dr_value}".encode('utf-8')]
             updated = True
     if metadata_choice in ["1", "3"]:
-        if '----:com.apple.iTunes:ROONALBUMTAG' not in audio or audio['----:com.apple.iTunes:ROONALBUMTAG'][0] != dr_text:
-            audio['----:com.apple.iTunes:ROONALBUMTAG'] = [dr_text]
+        tag = '----:com.apple.iTunes:ROONALBUMTAG'
+        if tag in audio:
+            new_value = update_dr_value(audio[tag][0].decode('utf-8'), dr_value, 'ROONALBUMTAG')
+            if new_value:
+                audio[tag] = [new_value.encode('utf-8')]
+                updated = True
+        else:
+            audio[tag] = [f"DR {dr_value}".encode('utf-8')]
             updated = True
     return updated
 
 def update_dsf_tags(audio, dr_value, metadata_choice):
     updated = False
-    dr_text = f"DR {dr_value}"
-    
-    # Ensure the DSF file has an ID3 tag
     if audio.tags is None:
         audio.add_tags()
-    
     id3 = audio.tags
-    
     if metadata_choice in ["1", "2"]:
-        if 'TXXX:VERSION' not in id3 or id3['TXXX:VERSION'].text[0] != dr_text:
-            id3.add(TXXX(encoding=3, desc='VERSION', text=dr_text))
+        if 'TXXX:VERSION' in id3:
+            new_value = update_dr_value(id3['TXXX:VERSION'].text[0], dr_value, 'VERSION')
+            if new_value:
+                id3['TXXX:VERSION'].text = [new_value]
+                updated = True
+        else:
+            id3.add(TXXX(encoding=3, desc='VERSION', text=f"DR {dr_value}"))
             updated = True
     if metadata_choice in ["1", "3"]:
-        if 'TXXX:ROONALBUMTAG' not in id3 or id3['TXXX:ROONALBUMTAG'].text[0] != dr_text:
-            id3.add(TXXX(encoding=3, desc='ROONALBUMTAG', text=dr_text))
+        if 'TXXX:ROONALBUMTAG' in id3:
+            new_value = update_dr_value(id3['TXXX:ROONALBUMTAG'].text[0], dr_value, 'ROONALBUMTAG')
+            if new_value:
+                id3['TXXX:ROONALBUMTAG'].text = [new_value]
+                updated = True
+        else:
+            id3.add(TXXX(encoding=3, desc='ROONALBUMTAG', text=f"DR {dr_value}"))
             updated = True
     return updated
 
@@ -190,7 +221,6 @@ def main():
     rename_dr_file_choice = input("Enter your choice (1 or 2): ").strip() or "1"
 
     for root, dirs, files in os.walk(root_dir):
-        # Remove hidden directories from the dirs list
         dirs[:] = [d for d in dirs if not d.startswith('.')]
         
         if 'foo_dr.txt' in files:
@@ -198,10 +228,25 @@ def main():
             dr_value = get_dr_value(dr_file_path)
             if dr_value:
                 logger.info(f"Processing directory: {root}")
-                success, new_dir = process_directory(root, dr_value, folder_name_choice, metadata_choice)
+                success = process_directory(root, dr_value, metadata_choice)
                 if success and rename_dr_file_choice == "1":
-                    new_dr_file_path = os.path.join(new_dir, 'foo_dr_processed.txt')
+                    new_dr_file_path = os.path.join(root, 'foo_dr_processed.txt')
                     safe_rename(dr_file_path, new_dr_file_path)
+                
+                if folder_name_choice == "1":
+                    folder_name = os.path.basename(root)
+                    current_dr = re.search(r'\(DR (\d+)\)', folder_name)
+                    if current_dr:
+                        if current_dr.group(1) != dr_value:
+                            new_name = re.sub(r'\(DR \d+\)', f'(DR {dr_value})', folder_name)
+                            new_path = os.path.join(os.path.dirname(root), new_name)
+                            safe_rename(os.path.abspath(root), os.path.abspath(new_path))
+                        else:
+                            logger.info(f"Folder '{folder_name}' already contains correct DR value. Skipping rename.")
+                    else:
+                        new_name = f"{folder_name} (DR {dr_value})"
+                        new_path = os.path.join(os.path.dirname(root), new_name)
+                        safe_rename(os.path.abspath(root), os.path.abspath(new_path))
 
 if __name__ == "__main__":
     main()
