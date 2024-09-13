@@ -74,7 +74,7 @@ When running the script, you'll be prompted with several options:
 
 - The script uses the `mutagen` library to handle audio file metadata.
 - It's recommended to backup your music library before running this script. Alternatively, it's recommended to test it on a small subset of your music library before running it against your entire music library.  For instance, you can try copying a few albums to a test folder and run it against those to see how it operates.
-- The script has only been tested on a Mac.
+- Exiting VERSION and ROONALBUMTAG tags are now retained and appended to instead of replaced.  If a DR value is already present it is updated, if necessary.
 
 ## Contributing
 
