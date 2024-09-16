@@ -45,6 +45,25 @@ Or on Windows:
 python drRoon.py "C:\Path To\Music Library"
 ```
 
+The above command will interactively ask you how you'd like to tag your albums.  Alternatively, you can specify your choices from the command line, as follows:
+
+```
+usage: drRoon.py [-h] [--folder-score {0,1}] [--metadata {0,1,2,3}] [--rename-logfile {0,1}] [--find-missing] root_dir
+
+Process DR values in audio files and directories.
+
+positional arguments:
+  root_dir              Root directory to process
+
+options:
+  -h, --help            show this help message and exit
+  --folder-score {0,1}  Add DR score to album folder name (0: No, 1: Yes)
+  --metadata {0,1,2,3}  Add DR score to metadata (0: No, 1: Both VERSION and ROONALBUMTAG, 2: VERSION only, 3: ROONALBUMTAG only)
+  --rename-logfile {0,1}
+                        Rename foo_dr.txt after processing (0: No, 1: Yes)
+  --find-missing        Find folder albums missing the required logfiles
+```
+
 ## Options
 
 When running the script, you'll be prompted with several options:
@@ -63,6 +82,9 @@ When running the script, you'll be prompted with several options:
 
 3. **Log File Management**
    - Choose whether to rename `foo_dr.txt` to `foo_dr_processed.txt` after successful processing, so the same albums are not re-tagged
+  
+4. **Find Missing Logfiles**
+   -  A "--find-missing" option has been added to recursively check the provided folder for missing log files.  This is handy if you've added new albums to your library but haven't generated their foo_dr.txt log files yet.
 
 ## Supported File Formats
 
