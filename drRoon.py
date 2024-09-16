@@ -192,9 +192,24 @@ def update_dsf_tags(audio, dr_value, metadata_choice):
             updated = True
     return updated
 
+def find_missing_logfiles(root_folder):
+    music_extensions = ('.mp3', '.dsf', '.flac', '.m4a')
+    required_files = ('foo_dr.txt', 'foo_dr_processed.txt')
+
+    for dirpath, dirnames, filenames in os.walk(root_folder):
+        has_music_files = any(filename.lower().endswith(music_extensions) for filename in filenames)
+        has_required_file = any(required_file.lower() in [f.lower() for f in filenames] for required_file in required_files)
+
+        if has_music_files and not has_required_file:
+            print(f"Album folder missing required logfile: {dirpath}")
+
 def main():
     parser = argparse.ArgumentParser(description="Process DR values in audio files and directories.")
     parser.add_argument("root_dir", help="Root directory to process")
+    parser.add_argument("--folder-score", choices=["0", "1"], help="Add DR score to album folder name (0: No, 1: Yes)")
+    parser.add_argument("--metadata", choices=["0", "1", "2", "3"], help="Add DR score to metadata (0: No, 1: Both VERSION and ROONALBUMTAG, 2: VERSION only, 3: ROONALBUMTAG only)")
+    parser.add_argument("--rename-logfile", choices=["0", "1"], help="Rename foo_dr.txt after processing (0: No, 1: Yes)")
+    parser.add_argument("--find-missing", action="store_true", help="Find folder albums missing the required logfiles")
     args = parser.parse_args()
 
     root_dir = args.root_dir
@@ -203,22 +218,33 @@ def main():
         logger.error(f"The specified directory '{root_dir}' does not exist.")
         return
 
-    print("Would you like to add the DR score to the album folder name?")
-    print("1. Yes")
-    print("2. No (default)")
-    folder_name_choice = input("Enter your choice (1 or 2): ").strip() or "2"
+    if args.find_missing:
+        find_missing_logfiles(root_dir)
+        return
 
-    print("Would you like to add the DR score to metadata?")
-    print("1. Yes, to both the VERSION and ROONALBUMTAG tags (default)")
-    print("2. Yes, to the VERSION tag only")
-    print("3. Yes, to the ROONALBUMTAG tag only")
-    print("4. No")
-    metadata_choice = input("Enter your choice (1, 2, 3, or 4): ").strip() or "1"
+    folder_name_choice = args.folder_score
+    if folder_name_choice is None:
+        print("Would you like to add the DR score to the album folder name?")
+        print("0. No (default)")
+        print("1. Yes")
+        folder_name_choice = input("Enter your choice (0 or 1): ").strip() or "0"
 
-    print("Would you like to rename foo_dr.txt to foo_dr_processed.txt after successful processing?")
-    print("1. Yes (default)")
-    print("2. No")
-    rename_dr_file_choice = input("Enter your choice (1 or 2): ").strip() or "1"
+    metadata_choice = args.metadata
+    if metadata_choice is None:
+        print("Would you like to add the DR score to metadata?")
+        print("0. No")
+        print("1. Yes, to both the VERSION and ROONALBUMTAG tags (default)")
+        print("2. Yes, to the VERSION tag only")
+        print("3. Yes, to the ROONALBUMTAG tag only")
+        metadata_choice = input("Enter your choice (0, 1, 2, or 3): ").strip() or "1"
+
+    rename_dr_file_choice = args.rename_logfile
+    if rename_dr_file_choice is None:
+        print("Would you like to rename foo_dr.txt to foo_dr_processed.txt after successful processing?")
+        print("0. No")
+        print("1. Yes (default)")
+
+        rename_dr_file_choice = input("Enter your choice (0 or 1): ").strip() or "1"
 
     for root, dirs, files in os.walk(root_dir):
         dirs[:] = [d for d in dirs if not d.startswith('.')]
