@@ -61,7 +61,7 @@ options:
   --metadata {0,1,2,3}  Add DR score to metadata (0: No, 1: Both VERSION and ROONALBUMTAG, 2: VERSION only, 3: ROONALBUMTAG only)
   --rename-logfile {0,1}
                         Rename foo_dr.txt after processing (0: No, 1: Yes)
-  --find-missing        Find folder albums missing the required logfiles
+  --find-missing        Find folder albums missing the required log files
 ```
 
 ## Options
@@ -83,9 +83,9 @@ When running the script, you'll be prompted with several options:
 3. **Log File Management**
    - Choose whether to rename `foo_dr.txt` to `foo_dr_processed.txt` after successful processing, so the same albums are not re-tagged
   
-## Find Missing Logfiles
+## Find Missing Log Files
   
-A "--find-missing" option has been added to recursively check the provided folder for missing log files.  This is handy if you've added new albums to your library but haven't generated their `foo_dr.txt` log files yet.
+A "--find-missing" option has been added to recursively check the provided folder for missing log files.  This is handy if you've added new albums to your library but haven't generated their `foo_dr.txt` log files yet.  It simply checks each album folder for either a `foo_dr.txt` or `foo_dr_processed.txt` file and if not found, reports back to you.
 
 ## Supported File Formats
 
