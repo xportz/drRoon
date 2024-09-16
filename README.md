@@ -83,8 +83,9 @@ When running the script, you'll be prompted with several options:
 3. **Log File Management**
    - Choose whether to rename `foo_dr.txt` to `foo_dr_processed.txt` after successful processing, so the same albums are not re-tagged
   
-4. **Find Missing Logfiles**
-   -  A "--find-missing" option has been added to recursively check the provided folder for missing log files.  This is handy if you've added new albums to your library but haven't generated their foo_dr.txt log files yet.
+## Find Missing Logfiles
+  
+A "--find-missing" option has been added to recursively check the provided folder for missing log files.  This is handy if you've added new albums to your library but haven't generated their `foo_dr.txt` log files yet.
 
 ## Supported File Formats
 
